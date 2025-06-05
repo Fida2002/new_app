@@ -20,7 +20,7 @@ from gspread_formatting import format_cell_ranges, cellFormat, color
 # Google Sheets connection
 def connect_to_gsheet():
     if "creds" not in st.session_state or "sheet_name" not in st.session_state or "worksheet" not in st.session_state:
-        st.warning("Please upload credentials and enter sheet info.")
+        return None  # suppress warning during deployment
         return None
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -156,9 +156,7 @@ def get_current_spy():
 
 def main():
     # Sidebar setup (sheet name only)
-    st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Streamlit_logo_secondary_dark.svg/512px-Streamlit_logo_secondary_dark.svg.png", use_column_width=True)
-
-    st.sidebar.title("📄 Connect Your Google Sheet")
+        st.sidebar.title("📄 Connect Your Google Sheet")
     st.sidebar.markdown(
         """
         1. **Enter your Google Sheet name**  
@@ -186,6 +184,14 @@ def main():
         return
 
     st.title("📈 Stock Tracker App")
+
+    # Display existing data before form
+    existing_df = load_data()
+    if not existing_df.empty:
+        existing_df["B_Date"] = pd.to_datetime(existing_df["B_Date"], errors='coerce')
+        existing_df["Days"] = existing_df["B_Date"].apply(lambda d: (datetime.today().date() - d.date()).days if pd.notnull(d) and hasattr(d, 'date') else '')
+        st.subheader("📊 Current Portfolio Data")
+        st.dataframe(existing_df, use_container_width=True)
 
 
     ticker = st.text_input("Stock Ticker (e.g., AAPL)")
@@ -247,6 +253,7 @@ def main():
 
             df = pd.concat([df, pd.DataFrame([new_row])], ignore_index=True)
             df["B_Date"] = pd.to_datetime(df["B_Date"], errors='coerce')
+            df["Days"] = df["B_Date"].apply(lambda d: (datetime.today().date() - d.date()).days if pd.notnull(d) and hasattr(d, 'date') else '')
 
             # Remove any old total rows again to be safe
             df = df[df["Ticker"] != "Total"]
@@ -291,4 +298,4 @@ def main():
             st.error(f"Error during calculations or saving: {e}")
 
 if __name__ == "__main__":
-    main()            
+    main()
