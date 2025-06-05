@@ -156,7 +156,7 @@ def get_current_spy():
 
 def main():
     # Sidebar setup (sheet name only)
-        st.sidebar.title("📄 Connect Your Google Sheet")
+    st.sidebar.title("📄 Connect Your Google Sheet")
     st.sidebar.markdown(
         """
         1. **Enter your Google Sheet name**  
