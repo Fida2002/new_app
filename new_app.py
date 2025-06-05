@@ -1,3 +1,11 @@
+import os
+import json
+
+# Write creds.json dynamically from env variable (Render/Railway-safe)
+if not os.path.exists("creds.json") and "GCP_CREDENTIALS" in os.environ:
+    with open("creds.json", "w") as f:
+        json.dump(json.loads(os.environ["GCP_CREDENTIALS"]), f)
+
 import streamlit as st
 import pandas as pd
 import yfinance as yf
@@ -172,7 +180,7 @@ def main():
         st.session_state["sheet_name"] = sheet_name
         st.session_state["worksheet"] = worksheet_name
         st.session_state["creds"] = "creds.json"  # Hardcoded
-        st.success("✅ Connected to Google Sheet.")
+        st.success("✅ Using developer's service account. Please ensure your sheet is shared with the service account email.")
     else:
         st.warning("⚠️ Enter your Google Sheet info to begin.")
         return
